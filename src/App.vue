@@ -36,6 +36,12 @@ export default defineComponent({
 </script>
 
 <style scoped>
+* {
+  font-family: Montserrat;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 .main_filter_wrapper {
   position: relative;
 }

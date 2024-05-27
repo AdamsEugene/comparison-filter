@@ -1,11 +1,24 @@
 {
-  "name": "filters",
-  "version": "0.0.0",
-  "private": true,
+  "name": "filter-component-lib",
+  "version": "0.0.1",
   "type": "module",
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/filter-component-lib.umd.cjs",
+  "module": "./dist/filter-component-lib.js",
+  "exports": {
+    ".": {
+      "import": "./dist/filter-component-lib.js",
+      "require": "./dist/filter-component-lib.umd.cjs"
+    },
+    "./style.css": "./dist/style.css"
+  },
+  "types": "./dist/index.d.ts",
   "scripts": {
     "dev": "vite",
     "build": "run-p type-check \"build-only {@}\" --",
+    "build-": "vite build && vue-tsc --emitDeclarationOnly",
     "preview": "vite preview",
     "build-only": "vite build",
     "type-check": "vue-tsc --build --force",
@@ -13,6 +26,7 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
+    "rollup-plugin-typescript2": "^0.36.0",
     "vue": "^3.4.21"
   },
   "devDependencies": {

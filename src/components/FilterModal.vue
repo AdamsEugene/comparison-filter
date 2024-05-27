@@ -2,48 +2,120 @@
   <div class="filter_modal" @click="handleClickOutside">
     <div class="filter_wrapper" @click.stop>
       <header class="filter_header">
-        <p class="filter_header_text">{{ data.name }}</p>
+        <div class="filter_header_left">
+          <img class="filter_image" :src="getImagePath(data.iconSrc)" alt="" />
+          <p class="filter_header_text">{{ data.name }}</p>
+        </div>
+        <svg
+          id="close_button"
+          xmlns="http://www.w3.org/2000/svg"
+          width="20"
+          height="20"
+          viewBox="0 0 20 20"
+          fill="none"
+          @click="closeSelectModal()"
+        >
+          <path
+            d="M15 5L5 15"
+            stroke="#677078"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+          <path
+            d="M5 5L15 15"
+            stroke="#677078"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
       </header>
       <div class="filter_content">
-        <div class="filter_content_dropdown">
-          <p class="dropdown_title">Referrer URL</p>
-          <div class="dropdown_body_wrapper">
-            <div class="arrow_button_wrapper" @click="toggleDropdown">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="15"
-                height="8"
-                viewBox="0 0 15 8"
-                fill="none"
-                :class="{ rotated: isDropdownOpen }"
+        <div class="filter_content_wrapper">
+          <div class="filter_content_dropdown">
+            <p class="dropdown_title">{{ labelMap(data?.name) }}</p>
+            <div class="dropdown_body_wrapper">
+              <div
+                v-if="noDropdown(data.name)"
+                class="arrow_button_wrapper"
+                @click="toggleDropdown"
               >
-                <path
-                  d="M1.89062 1L7.7519 6.82487C7.8494 6.92177 8.00685 6.92177 8.10435 6.82487L13.9656 1"
-                  stroke="#34404B"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                />
-              </svg>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="15"
+                  height="8"
+                  viewBox="0 0 15 8"
+                  fill="none"
+                  :class="{ rotated: isDropdownOpen }"
+                >
+                  <path
+                    d="M1.89062 1L7.7519 6.82487C7.8494 6.92177 8.00685 6.92177 8.10435 6.82487L13.9656 1"
+                    stroke="#34404B"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                  />
+                </svg>
+              </div>
+              <input
+                class="dropdown_body"
+                :type="numberInput(data.name) ? 'number' : 'text'"
+                :placeholder="placeholderMap(data?.name)"
+                @blur="handleBlur"
+                @focus="openDropdown"
+                @input="filterItems"
+                v-model="selectedItem"
+              />
+              <ul v-if="isDropdownOpen && noDropdown(data.name)" class="dropdown_menu_wrapper">
+                <li
+                  v-for="item in dropdownItems"
+                  :key="item"
+                  class="dropdown_menu_item"
+                  :class="{ activeClass: item === selectedItem }"
+                  @click="selectItem(item)"
+                >
+                  {{ item }}
+                </li>
+              </ul>
             </div>
-            <input
-              class="dropdown_body"
-              type="text"
-              placeholder="Select"
-              @blur="handleBlur"
-              @focus="openDropdown"
-              @input="filterItems"
-              v-model="selectedItem"
-            />
-            <ul v-if="isDropdownOpen" class="dropdown_menu_wrapper">
-              <li
-                v-for="item in dropdownItems"
-                :key="item"
-                class="dropdown_menu_item"
-                @click="selectItem(item)"
-              >
-                {{ item }}
-              </li>
-            </ul>
+          </div>
+          <div v-if="data.showSign" class="filter_content_dropdown">
+            <p class="dropdown_title">{{ SecondLabelMap(data?.name) }}</p>
+            <div class="dropdown_body_wrapper">
+              <!-- <div class="arrow_button_wrapper" @click="toggleDropdown">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="15"
+                  height="8"
+                  viewBox="0 0 15 8"
+                  fill="none"
+                  :class="{ rotated: isDropdownOpen }"
+                >
+                  <path
+                    d="M1.89062 1L7.7519 6.82487C7.8494 6.92177 8.00685 6.92177 8.10435 6.82487L13.9656 1"
+                    stroke="#34404B"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                  />
+                </svg>
+              </div> -->
+              <input
+                class="dropdown_body second_one"
+                :type="numberInput(data.name) ? 'number' : 'text'"
+                :placeholder="SecondPlaceholderMap(data?.name)"
+              />
+              <div v-if="data.name === 'Average Order Value'" class="absolute_placehopder">$</div>
+              <!-- <ul v-if="isDropdownOpen" class="dropdown_menu_wrapper">
+                <li
+                  v-for="item in dropdownItems"
+                  :key="item"
+                  class="dropdown_menu_item"
+                  @click="selectItem(item)"
+                >
+                  {{ item }}
+                </li>
+              </ul> -->
+            </div>
           </div>
         </div>
       </div>
@@ -115,6 +187,10 @@ export default defineComponent({
       props.closeSelectModal()
     }
 
+    const getImagePath = (filename: string) => {
+      return filename
+    }
+
     const next = () => {
       if (selectedItem.value) {
         emit('item-selected', selectedItem.value)
@@ -132,6 +208,56 @@ export default defineComponent({
       const searchText = selectedItem.value.toLowerCase()
       dropdownItems.value = items.filter((item) => item.toLowerCase().includes(searchText))
       openDropdown()
+    }
+
+    const noDropdown = (filter: string) => {
+      return filter !== 'Total Pages Visited'
+    }
+
+    const numberInput = (filter: string) => {
+      return filter === 'Total Pages Visited'
+    }
+
+    const labelMap = (inputType: string) => {
+      const map: { [x: string]: string } = {
+        'Entry Page': 'Referrer URL',
+        'Traffic Source': 'Referrer URL',
+        'Total Pages Visited': 'Number of visits',
+        'Viewed Page': 'Action URL',
+        'Average Order Value': 'Condition'
+      }
+      return map[inputType]
+    }
+
+    const placeholderMap = (inputType: string) => {
+      const map: { [x: string]: string } = {
+        'Entry Page': 'Select',
+        'Traffic Source': 'Select',
+        'Total Pages Visited': 'Enter value',
+        'Viewed Page': 'Select',
+        'Average Order Value': 'Equals'
+      }
+      return map[inputType]
+    }
+
+    const SecondLabelMap = (inputType: string) => {
+      const map: { [x: string]: string } = {
+        'Entry Page': 'Value',
+        'Traffic Source': '',
+        'Total Pages Visited': '',
+        'Average Order Value': 'Value'
+      }
+      return map[inputType]
+    }
+
+    const SecondPlaceholderMap = (inputType: string) => {
+      const map: { [x: string]: string } = {
+        'Entry Page': 'Select',
+        'Traffic Source': '',
+        'Total Pages Visited': '',
+        'Average Order Value': '0.00'
+      }
+      return map[inputType]
     }
 
     onMounted(() => {
@@ -154,13 +280,38 @@ export default defineComponent({
       next,
       dropdownItems,
       selectedItem,
-      filterItems
+      filterItems,
+      getImagePath,
+      labelMap,
+      placeholderMap,
+      SecondLabelMap,
+      SecondPlaceholderMap,
+      noDropdown,
+      numberInput
     }
   }
 })
 </script>
 
 <style scoped>
+* {
+  font-family: Montserrat;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+input:focus,
+input:visited,
+input:focus-visible,
+input:focus-within,
+input:target {
+  border-radius: var(--corner-med, 8px);
+  border: 1px solid var(--Info-03-Main, #449ff4) !important;
+  background: var(--Grey-White, #fff);
+  box-shadow: 0px 1px 2px 0px rgba(26, 40, 53, 0.09);
+}
+
 .filter_modal {
   position: absolute;
   display: flex;
@@ -196,14 +347,29 @@ export default defineComponent({
       padding: var(--vertical-padding-lg, 24px) var(--vertical-padding-med, 20px) 16px
         var(--vertical-padding-med, 20px);
       align-items: flex-start;
+      justify-content: space-between;
       gap: 10px;
       align-self: stretch;
       border: 1px solid var(--Grey-200, #e6e7e8);
 
+      .filter_header_left {
+        display: flex;
+        align-items: center;
+        gap: var(--corner-med, 8px);
+      }
+
+      img {
+        width: var(--vertical-padding-med, 20px);
+        height: var(--vertical-padding-med, 20px);
+      }
+
+      #close_button {
+        cursor: pointer;
+      }
+
       .filter_header_text {
         flex: 1 0 0;
         color: var(--Grey-800, #34404b);
-        font-family: Montserrat;
         font-size: 16px;
         font-style: normal;
         font-weight: 700;
@@ -219,11 +385,20 @@ export default defineComponent({
       gap: 32px;
       align-self: stretch;
 
+      .filter_content_wrapper {
+        display: flex;
+        /* padding: var(--vertical-padding-lg, 24px); */
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+        align-self: stretch;
+      }
+
       .filter_content_dropdown {
         display: flex;
         flex-direction: column;
         align-items: flex-start;
-        gap: var(--horizontal-padding-lg, 12px);
+        gap: 4px;
         align-self: stretch;
 
         .dropdown_title {
@@ -231,13 +406,24 @@ export default defineComponent({
           color: var(--Grey-800, #34404b);
           font-size: 14px;
           font-style: normal;
-          font-weight: 700;
-          line-height: 18px; /* 128.571% */
+          font-weight: 500;
+          line-height: 20px; /* 142.857% */
         }
 
         .dropdown_body_wrapper {
           position: relative;
           width: 100%;
+
+          .absolute_placehopder {
+            position: absolute;
+            left: 13px;
+            top: 13px;
+            color: var(--Grey-600, #677078);
+            font-size: 16px;
+            font-style: normal;
+            font-weight: 400;
+            line-height: 24px; /* 150% */
+          }
 
           .arrow_button_wrapper {
             position: absolute;
@@ -263,7 +449,7 @@ export default defineComponent({
 
           .dropdown_body {
             display: flex;
-            width: calc(100% - 24px);
+            width: calc(100%);
             padding: var(--horizontal-padding-lg, 12px);
             justify-content: space-between;
             align-items: center;
@@ -274,19 +460,22 @@ export default defineComponent({
             box-shadow: 0px 1px 2px 0px rgba(26, 40, 53, 0.09);
 
             color: var(--Grey-800, #34404b);
-            font-family: Montserrat;
-            font-size: 14px;
+            font-size: 16px;
             font-style: normal;
             font-weight: 400;
-            line-height: 20px; /* 142.857% */
+            line-height: 24px; /* 150% */
+
+            &.second_one {
+              text-align: right;
+            }
           }
 
           .dropdown_body::placeholder {
-            color: var(--Grey-800, #34404b);
-            font-size: 14px;
+            color: var(--Grey-800, #999fa5);
+            font-size: 16px;
             font-style: normal;
             font-weight: 400;
-            line-height: 20px; /* 142.857% */
+            line-height: 24px; /* 150% */
           }
 
           .dropdown_menu_wrapper {
@@ -298,18 +487,34 @@ export default defineComponent({
             box-shadow: 0px 1px 2px 0px rgba(26, 40, 53, 0.09);
             list-style: none;
             padding: 0;
-            margin-top: 8px;
+            margin-top: 4px;
             max-height: 300px;
             overflow-y: auto;
             z-index: 2;
 
             .dropdown_menu_item {
-              padding: 10px 20px;
+              display: flex;
+              padding: var(--corner-med, 8px) var(--horizontal-padding-lg, 12px);
+              align-items: flex-start;
+              align-self: stretch;
               cursor: pointer;
+
+              color: var(--Grey-800, #34404b);
+              font-size: 14px;
+              font-style: normal;
+              font-weight: 400;
+              line-height: 20px; /* 142.857% */
+              &:not(:last-child) {
+                border-bottom: 1px solid var(--Grey-200, #e6e7e8);
+              }
+              &.activeClass {
+                color: var(--Grey-800, #fff) !important;
+                background: #03c191 !important;
+              }
             }
 
             .dropdown_menu_item:hover {
-              background: var(--Grey-100, #f6f6f6);
+              background: #e6e7e8;
             }
           }
         }
@@ -339,7 +544,7 @@ export default defineComponent({
       align-items: flex-start;
       gap: 10px;
       border-radius: var(--Padding-Corner, 6px);
-      background: var(--Grey-100, #f6f6f6);
+      background: var(--Grey-200, #e6e7e8);
       box-shadow: 0px 1px 2px 0px rgba(26, 40, 53, 0.09);
       cursor: pointer;
 

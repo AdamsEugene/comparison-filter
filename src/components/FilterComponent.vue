@@ -14,7 +14,7 @@
           </p>
           <template
             v-for="(filter, index) in selectIndicators.pendingList.slice(0, 2)"
-            :key="filter.filter"
+            :key="filter.name"
           >
             <div class="right_button new_color insideCompare">
               <p class="right_button_text">{{ filter.name }}</p>
@@ -368,6 +368,13 @@ export default defineComponent({
 </script>
 
 <style scoped>
+* {
+  font-family: Montserrat;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
 .heat_custom_filter_absolute {
   position: absolute;
   top: 58px;
@@ -573,7 +580,6 @@ export default defineComponent({
 
       .left_button_text {
         color: var(--Grey-600, #677078);
-        font-family: Montserrat;
         font-size: 16px;
         font-style: normal;
         font-weight: 600;
@@ -624,7 +630,6 @@ export default defineComponent({
 
     .right_button_text {
       color: var(--Primary-03-Main, #00936f);
-      font-family: Montserrat;
       font-size: 16px;
       font-style: normal;
       font-weight: 600;
