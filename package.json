@@ -1,7 +1,12 @@
 {
   "name": "filter-component-lib",
   "version": "0.0.2",
+  "private": false,
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AdamsEugene/comparison-filter.git"
+  },
   "files": [
     "dist"
   ],
@@ -14,6 +19,15 @@
     },
     "./style.css": "./dist/style.css"
   },
+  "keywords": [
+    "filter",
+    "custom-filter",
+    "heatmap",
+    "vite",
+    "vue3",
+    "vue",
+    "vuejs"
+  ],
   "types": "./dist/index.d.ts",
   "scripts": {
     "dev": "vite",
