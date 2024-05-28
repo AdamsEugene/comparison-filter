@@ -3,7 +3,7 @@
     <div class="filter_wrapper" @click.stop>
       <header class="filter_header">
         <div class="filter_header_left">
-          <img class="filter_image" :src="getImagePath(data.iconSrc)" alt="" />
+          <img v-if="data.iconSrc" class="filter_image" :src="getImagePath(data.iconSrc)" alt="" />
           <p class="filter_header_text">{{ data.name }}</p>
         </div>
         <svg
@@ -66,6 +66,9 @@
                 @input="filterItems"
                 v-model="selectedItem"
               />
+              <p v-if="secondInputError" class="error_message">
+                Invalid input: Please enter a numeric value
+              </p>
               <ul v-if="isDropdownOpen && noDropdown(data.name)" class="dropdown_menu_wrapper">
                 <li
                   v-for="item in dropdownItems"
@@ -101,8 +104,10 @@
               </div> -->
               <input
                 class="dropdown_body second_one"
-                :type="numberInput(data.name) ? 'number' : 'text'"
+                :type="'number'"
                 :placeholder="SecondPlaceholderMap(data?.name)"
+                v-model="inputValue"
+                @input="validateInput"
               />
               <div v-if="data.name === 'Average Order Value'" class="absolute_placehopder">$</div>
               <!-- <ul v-if="isDropdownOpen" class="dropdown_menu_wrapper">
@@ -115,6 +120,9 @@
                   {{ item }}
                 </li>
               </ul> -->
+              <p v-if="secondInputError" class="error_message">
+                Invalid input: Please enter a numeric value
+              </p>
             </div>
           </div>
         </div>
@@ -138,7 +146,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, onMounted, onBeforeUnmount } from 'vue'
+import { defineComponent, ref, onMounted, onBeforeUnmount, watch } from 'vue'
 
 const items = [
   'menu item 1',
@@ -157,6 +165,8 @@ export default defineComponent({
     const isDropdownOpen = ref(false)
     const dropdownItems = ref(items)
     const selectedItem = ref('')
+    const inputValue = ref<number>()
+    const secondInputError = ref(false)
 
     const toggleDropdown = () => {
       isDropdownOpen.value = !isDropdownOpen.value
@@ -179,7 +189,11 @@ export default defineComponent({
     }
 
     const selectItem = (item: string) => {
-      selectedItem.value = item
+      if (inputValue.value) {
+        selectedItem.value = `${inputValue.value}`
+      } else {
+        selectedItem.value = item
+      }
       closeDropdown()
     }
 
@@ -191,8 +205,28 @@ export default defineComponent({
       return filename
     }
 
+    console.log(props.data)
+
+    switch (props.data.name) {
+      case 'Average Order Value':
+        dropdownItems.value = [
+          'Equal ( = )',
+          'Less Than ( < )',
+          'Greater Than ( > )',
+          'Not Equal ( != )'
+        ]
+        break
+      case 'custom':
+        break
+      default:
+        break
+    }
+
     const next = () => {
       if (selectedItem.value) {
+        if (inputValue.value) {
+          selectedItem.value = `${inputValue.value}`
+        }
         emit('item-selected', selectedItem.value)
         props.closeSelectModal()
       }
@@ -218,13 +252,18 @@ export default defineComponent({
       return filter === 'Total Pages Visited'
     }
 
+    const validateInput = () => {
+      secondInputError.value = isNaN(Number(inputValue.value))
+    }
+
     const labelMap = (inputType: string) => {
       const map: { [x: string]: string } = {
         'Entry Page': 'Referrer URL',
         'Traffic Source': 'Referrer URL',
         'Total Pages Visited': 'Number of visits',
         'Viewed Page': 'Action URL',
-        'Average Order Value': 'Condition'
+        'Average Order Value': 'Condition',
+        'Create Custom Filter': 'Filter Name'
       }
       return map[inputType]
     }
@@ -235,7 +274,8 @@ export default defineComponent({
         'Traffic Source': 'Select',
         'Total Pages Visited': 'Enter value',
         'Viewed Page': 'Select',
-        'Average Order Value': 'Equals'
+        'Average Order Value': 'Equals',
+        'Create Custom Filter': 'Enter name'
       }
       return map[inputType]
     }
@@ -245,7 +285,8 @@ export default defineComponent({
         'Entry Page': 'Value',
         'Traffic Source': '',
         'Total Pages Visited': '',
-        'Average Order Value': 'Value'
+        'Average Order Value': 'Value',
+        custom: 'Condition'
       }
       return map[inputType]
     }
@@ -255,7 +296,8 @@ export default defineComponent({
         'Entry Page': 'Select',
         'Traffic Source': '',
         'Total Pages Visited': '',
-        'Average Order Value': '0.00'
+        'Average Order Value': '0.00',
+        custom: 'Enter value'
       }
       return map[inputType]
     }
@@ -266,6 +308,10 @@ export default defineComponent({
 
     onBeforeUnmount(() => {
       document.removeEventListener('click', handleDocumentClick)
+    })
+
+    watch(inputValue, () => {
+      validateInput()
     })
 
     return {
@@ -287,7 +333,10 @@ export default defineComponent({
       SecondLabelMap,
       SecondPlaceholderMap,
       noDropdown,
-      numberInput
+      numberInput,
+      inputValue,
+      validateInput,
+      secondInputError
     }
   }
 })
@@ -570,5 +619,13 @@ input:target {
       background: var(--Primary-03-Main, #00936f);
     }
   }
+}
+.error_message {
+  color: var(--Error-04-Dark, #b71e2d);
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 20px; /* 142.857% */
+  margin-top: 8px !important;
 }
 </style>

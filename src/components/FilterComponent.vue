@@ -297,6 +297,7 @@ export default defineComponent({
       )
     },
     onAddCustomFilter() {
+      this.modalData = { name: 'Create Custom Filter', definition: '', iconSrc: '', idsegment: 0, title: '',showSign:true }
       this.showSelectModal = true
     },
     onCompareWith(fromModal?: Boolean) {
