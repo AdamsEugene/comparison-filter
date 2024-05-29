@@ -297,7 +297,14 @@ export default defineComponent({
       )
     },
     onAddCustomFilter() {
-      this.modalData = { name: 'Create Custom Filter', definition: '', iconSrc: '', idsegment: 0, title: '',showSign:true }
+      this.modalData = {
+        name: 'Create Custom Filter',
+        definition: '',
+        iconSrc: '',
+        idsegment: 0,
+        title: '',
+        showSign: true
+      }
       this.showSelectModal = true
     },
     onCompareWith(fromModal?: Boolean) {
@@ -584,7 +591,7 @@ export default defineComponent({
         font-size: 16px;
         font-style: normal;
         font-weight: 600;
-        line-height: 32px; /* 200% */
+        line-height: 26px; /* 200% */
       }
     }
 
@@ -634,7 +641,7 @@ export default defineComponent({
       font-size: 16px;
       font-style: normal;
       font-weight: 600;
-      line-height: 32px; /* 200% */
+      line-height: 26px; /* 200% */
     }
 
     &.disabled_me {

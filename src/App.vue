@@ -27,6 +27,7 @@ export default defineComponent({
     onFilterValuesChange(values: ReturnData) {
       console.log(values)
       this.filteredValues = values
+      this.$emit('on-filter-values-change', values)
     },
     onToggleShowFilterMenu() {
       this.showFilterMenu = !this.showFilterMenu
